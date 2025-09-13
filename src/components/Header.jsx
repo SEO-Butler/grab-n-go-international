@@ -1,0 +1,126 @@
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import * as FiIcons from 'react-icons/fi';
+import SafeIcon from '../common/SafeIcon';
+import { toSlug } from '../utils/slug';
+import { track } from '../lib/analytics';
+
+const { FiMenu, FiX } = FiIcons;
+
+const Header = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const navItems = ['Home', 'Event Details', 'Food Stalls', 'Tickets', 'FAQ', 'Contact'];
+
+  // Focus management for accessibility
+  useEffect(() => {
+    if (isMenuOpen) {
+      // Focus the first menu item when menu opens
+      const firstMenuItem = document.querySelector('[data-mobile-menu-item]');
+      firstMenuItem?.focus();
+    }
+  }, [isMenuOpen]);
+
+  const handleMenuToggle = () => {
+    setIsMenuOpen(!isMenuOpen);
+    track('menu_toggle', { opened: !isMenuOpen });
+  };
+
+  const handleNavClick = (item) => {
+    track('menu_click', { item });
+    setIsMenuOpen(false);
+  };
+
+  return (
+    <motion.header 
+      className="fixed top-0 w-full bg-white/95 backdrop-blur-sm shadow-lg z-50"
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+    >
+      <div className="container mx-auto px-4 py-4">
+        <div className="flex items-center justify-between">
+          {/* Logo */}
+          <motion.div 
+            className="flex items-center space-x-3"
+            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="w-12 h-12 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-full flex items-center justify-center">
+              <span className="text-white font-bold text-lg">G&G</span>
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 bg-clip-text text-transparent">
+                Grab 'n Go
+              </h1>
+              <p className="text-sm text-gray-600">International</p>
+            </div>
+          </motion.div>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex space-x-8">
+            {navItems.map((item, index) => (
+              <motion.a
+                key={item}
+                href={`#${toSlug(item)}`}
+                className="text-gray-700 hover:text-orange-500 font-medium transition-colors duration-200"
+                whileHover={{ y: -2 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                onClick={() => handleNavClick(item)}
+              >
+                {item}
+              </motion.a>
+            ))}
+          </nav>
+
+          {/* Mobile Menu Button */}
+          <motion.button
+            className="md:hidden p-2"
+            onClick={handleMenuToggle}
+            whileTap={{ scale: 0.95 }}
+            aria-label={isMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-expanded={isMenuOpen}
+            aria-controls="mobile-menu"
+          >
+            <SafeIcon
+              icon={isMenuOpen ? FiX : FiMenu}
+              className="w-6 h-6 text-gray-700"
+            />
+          </motion.button>
+        </div>
+
+        {/* Mobile Menu */}
+        <motion.nav
+          id="mobile-menu"
+          className={`md:hidden mt-4 ${isMenuOpen ? 'block' : 'hidden'}`}
+          initial={{ opacity: 0, height: 0 }}
+          animate={{
+            opacity: isMenuOpen ? 1 : 0,
+            height: isMenuOpen ? 'auto' : 0
+          }}
+          transition={{ duration: 0.3 }}
+          role="navigation"
+          aria-label="Mobile navigation menu"
+        >
+          <div className="flex flex-col space-y-4 py-4">
+            {navItems.map((item, index) => (
+              <a
+                key={item}
+                href={`#${toSlug(item)}`}
+                className="text-gray-700 hover:text-orange-500 font-medium focus:text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 rounded px-2 py-1"
+                onClick={() => handleNavClick(item)}
+                data-mobile-menu-item={index === 0 ? true : undefined}
+              >
+                {item}
+              </a>
+            ))}
+          </div>
+        </motion.nav>
+      </div>
+    </motion.header>
+  );
+};
+
+export default Header;
