@@ -11,7 +11,6 @@ const Footer = () => {
   const contact = eventConfig.sections.contact;
 
   const socialLinks = [
-    { icon: FiFacebook, label: 'Facebook', href: 'https://www.facebook.com/' },
     { 
       icon: FiInstagram, 
       label: 'Instagram', 
