@@ -81,8 +81,8 @@ export const eventConfig = {
       offer: '🔥 Early Bird Special: Save 20% - Limited Time!'
     },
     contact: {
-      email: 'info@grabngointernational.com',
-      phone: '+264 813128945',
+      email: 'info@surefirenamibia.com',
+      phone: '+264 81 312 8945',
       socialHandle: '@GrabNGoInternational'
     }
   }

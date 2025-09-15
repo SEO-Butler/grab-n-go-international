@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import * as FiIcons from 'react-icons/fi';
+import { SiTiktok } from 'react-icons/si'; // <-- Add this import
 import SafeIcon from '../common/SafeIcon';
 import { eventConfig } from '../config/event';
 
@@ -10,10 +11,19 @@ const Footer = () => {
   const contact = eventConfig.sections.contact;
 
   const socialLinks = [
-    { icon: FiFacebook, label: 'Facebook', href: '#' },
-    { icon: FiInstagram, label: 'Instagram', href: '#' },
-    { icon: FiTwitter, label: 'Twitter', href: '#' },
+    { icon: FiFacebook, label: 'Facebook', href: 'https://www.facebook.com/' },
+    { 
+      icon: FiInstagram, 
+      label: 'Instagram', 
+      href: 'https://www.instagram.com/grab_n_go_nam?igsh=YmFsaXhvNzBwN3du&utm_source=SEOButler' 
+    },
+    { 
+      icon: SiTiktok, // <-- Use SiTiktok here
+      label: 'TikTok', 
+      href: 'https://www.tiktok.com/@grabngo_nam?_t=ZM-8zkSLZtIs6i&_r=1&utm_source=SEOButler' 
+    },
   ];
+
 
   return (
     <footer className="bg-gray-900 text-white py-16">
