@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { eventConfig } from '../config/event';
 import { mapsSearchUrl, mapsDirectionsUrl } from '../utils/maps';
@@ -12,7 +11,7 @@ const LocationSection = () => {
   const directionsUrl = mapsDirectionsUrl(coords.lat, coords.lng);
 
   return (
-    <section id="contact" className="py-20 bg-gray-50">
+    <section id="contact" className="py-20" style={{backgroundColor: '#ffffff'}}>
       <div className="container mx-auto px-4">
         <motion.div
           className="text-center mb-16"
@@ -21,10 +20,10 @@ const LocationSection = () => {
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold mb-4" style={{color: '#b14724'}}>
             {location.title}
           </h2>
-          <p className="text-xl text-gray-600">
+          <p className="text-xl" style={{color: '#193818'}}>
             Head to {location.description} for your adventure!
           </p>
         </motion.div>
@@ -39,7 +38,10 @@ const LocationSection = () => {
             viewport={{ once: true }}
           >
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-              <div className="h-80 bg-gradient-to-br from-green-400 to-blue-500 relative flex items-center justify-center">
+              <div 
+                className="h-80 relative flex items-center justify-center"
+                style={{background: 'linear-gradient(135deg, #b14724 0%, #193818 100%)'}}
+              >
                 {/* Interactive Map Link */}
                 <motion.a
                   href={googleMapsUrl}
@@ -73,7 +75,7 @@ const LocationSection = () => {
                   animate={{ y: 0, scale: 1 }}
                   transition={{ delay: 1, type: "spring", stiffness: 300, damping: 20 }}
                 >
-                  <div className="w-4 h-4 bg-red-500 rounded-full animate-pulse"></div>
+                  <div className="w-4 h-4 rounded-full animate-pulse" style={{backgroundColor: '#f7931d'}}></div>
                 </motion.div>
 
                 {/* Ripple Effect */}
@@ -83,7 +85,7 @@ const LocationSection = () => {
                   animate={{ scale: 3, opacity: [0, 0.5, 0] }}
                   transition={{ delay: 1.5, duration: 2, repeat: Infinity }}
                 >
-                  <div className="w-4 h-4 bg-red-300 rounded-full"></div>
+                  <div className="w-4 h-4 rounded-full" style={{backgroundColor: 'rgba(247, 147, 29, 0.3)'}}></div>
                 </motion.div>
               </div>
             </div>
@@ -98,20 +100,20 @@ const LocationSection = () => {
             viewport={{ once: true }}
           >
             <div className="bg-white rounded-2xl shadow-xl p-8">
-              <h3 className="text-2xl font-bold text-gray-800 mb-6">Event Details</h3>
+              <h3 className="text-2xl font-bold mb-6" style={{color: '#b14724'}}>Event Details</h3>
               <div className="space-y-4">
                 <motion.div
                   className="flex items-center space-x-4"
                   whileHover={{ x: 10 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{backgroundColor: 'rgba(177, 71, 36, 0.1)'}}>
                     <span className="text-2xl">📍</span>
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-800">Location</p>
-                    <p className="text-gray-600">{location.description}</p>
-                    <p className="text-xs text-gray-500 font-mono">
+                    <p className="font-semibold" style={{color: '#b14724'}}>Location</p>
+                    <p style={{color: '#193818'}}>{location.description}</p>
+                    <p className="text-xs font-mono" style={{color: '#10300f'}}>
                       {coords.lat}, {coords.lng}
                     </p>
                   </div>
@@ -122,12 +124,12 @@ const LocationSection = () => {
                   whileHover={{ x: 10 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{backgroundColor: 'rgba(25, 56, 24, 0.1)'}}>
                     <span className="text-2xl">🕐</span>
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-800">Boarding Time</p>
-                    <p className="text-gray-600">{location.eventTime}</p>
+                    <p className="font-semibold" style={{color: '#b14724'}}>Boarding Time</p>
+                    <p style={{color: '#193818'}}>{location.eventTime}</p>
                   </div>
                 </motion.div>
 
@@ -136,12 +138,12 @@ const LocationSection = () => {
                   whileHover={{ x: 10 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{backgroundColor: 'rgba(177, 71, 36, 0.15)'}}>
                     <span className="text-2xl">📅</span>
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-800">Date</p>
-                    <p className="text-gray-600">{location.eventDate}</p>
+                    <p className="font-semibold" style={{color: '#b14724'}}>Date</p>
+                    <p style={{color: '#193818'}}>{location.eventDate}</p>
                   </div>
                 </motion.div>
 
@@ -150,30 +152,32 @@ const LocationSection = () => {
                   whileHover={{ x: 10 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{backgroundColor: 'rgba(16, 48, 15, 0.1)'}}>
                     <span className="text-2xl">🚗</span>
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-800">Parking</p>
-                    <p className="text-gray-600">{location.parkingInfo}</p>
+                    <p className="font-semibold" style={{color: '#b14724'}}>Parking</p>
+                    <p style={{color: '#193818'}}>{location.parkingInfo}</p>
                   </div>
                 </motion.div>
               </div>
             </div>
 
             <motion.div
-              className="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-2xl p-6 text-center"
+              className="rounded-2xl p-6 text-center"
+              style={{background: 'linear-gradient(135deg, #b14724 0%, #193818 100%)'}}
               whileHover={{ scale: 1.02 }}
               transition={{ duration: 0.2 }}
             >
-              <h4 className="text-xl font-bold text-black mb-2">Need Directions?</h4>
-              <p className="text-black/80 mb-4">Get turn-by-turn directions to the venue</p>
+              <h4 className="text-xl font-bold text-white mb-2">Need Directions?</h4>
+              <p className="text-white/90 mb-4">Get turn-by-turn directions to the venue</p>
               <div className="flex gap-3 justify-center">
                 <motion.a
                   href={directionsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-black text-white px-6 py-2 rounded-full font-semibold hover:bg-gray-800 transition-colors"
+                  className="px-6 py-2 rounded-full font-semibold transition-colors"
+                  style={{backgroundColor: '#10300f', color: 'white'}}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => track('maps_directions_click', { coords })}
@@ -184,7 +188,8 @@ const LocationSection = () => {
                   href={googleMapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-white text-black px-6 py-2 rounded-full font-semibold hover:bg-gray-100 transition-colors"
+                  className="bg-white px-6 py-2 rounded-full font-semibold hover:bg-gray-100 transition-colors"
+                  style={{color: '#b14724'}}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => track('maps_click', { type: 'view_on_map', coords })}
@@ -196,18 +201,22 @@ const LocationSection = () => {
 
             {/* Additional Location Info */}
             <motion.div
-              className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg"
+              className="p-4 rounded-r-lg"
+              style={{
+                backgroundColor: 'rgba(177, 71, 36, 0.05)',
+                borderLeft: '4px solid #b14724'
+              }}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
               viewport={{ once: true }}
             >
-              <h4 className="font-semibold text-blue-800 mb-2">📍 Exact Coordinates</h4>
-              <p className="text-blue-700 text-sm">
+              <h4 className="font-semibold mb-2" style={{color: '#b14724'}}>📍 Exact Coordinates</h4>
+              <p className="text-sm" style={{color: '#193818'}}>
                 Latitude: {coords.lat}<br />
                 Longitude: {coords.lng}
               </p>
-              <p className="text-blue-600 text-xs mt-2">
+              <p className="text-xs mt-2" style={{color: '#10300f'}}>
                 Perfect for GPS navigation and ride-sharing apps
               </p>
             </motion.div>

@@ -1,9 +1,9 @@
 export const eventConfig = {
   branding: {
     name: "Grab-'n-Go International",
-    themeColorFrom: '#ef4444',
-    themeColorVia: '#f97316',
-    themeColorTo: '#f59e0b',
+    themeColorFrom: '#f7931d', // Grab n Go primary orange
+    themeColorVia: '#773232',  // Grab n Go secondary dark red-brown
+    themeColorTo: '#f7931d',
     logoUrl: '/logo.svg',
   },
   sections: {
@@ -13,9 +13,9 @@ export const eventConfig = {
       date: 'OCTOBER 4TH, 2025',
       location: 'EL CAMPO NURSERY & RECREATIONAL PARK',
       backgroundGradients: [
-        'linear-gradient(135deg, #f97316 0%, #ef4444 50%, #ec4899 100%)',
-        'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ef4444 100%)',
-        'linear-gradient(135deg, #10b981 0%, #f59e0b 50%, #ef4444 100%)',
+        'linear-gradient(135deg, #f7931d 0%, #773232 50%, #f7931d 100%)',
+        'linear-gradient(135deg, #773232 0%, #f7931d 50%, #773232 100%)',
+        'linear-gradient(135deg, #f7931d 0%, #ffa733 50%, #773232 100%)',
       ],
       ctaText: 'Get Your Ticket',
     },
@@ -33,20 +33,6 @@ export const eventConfig = {
             'Event souvenir'
           ],
           popular: false,
-        },
-        {
-          id: 'firstClass',
-          name: 'First Class Experience',
-          advance: 180,
-          gate: 220,
-          features: [
-            'Early access & VIP lounge',
-            'Priority tasting queue',
-            'Exclusive merch pack',
-            'Complimentary drinks',
-            'Reserved seating area'
-          ],
-          popular: true,
         },
       ]
     },

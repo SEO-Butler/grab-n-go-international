@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import * as FiIcons from 'react-icons/fi';
 import SafeIcon from '../common/SafeIcon';
@@ -41,16 +41,18 @@ const Header = () => {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <motion.div 
+          <motion.div
             className="flex items-center space-x-3"
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.2 }}
           >
-            <div className="w-12 h-12 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-lg">G&G</span>
-            </div>
+            <img
+              src="../../public/images/Grab n Go logo -t.png"
+              alt="Grab 'n Go International Logo"
+              className="h-12 w-auto"
+            />
             <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 bg-clip-text text-transparent">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-500 via-red-900 to-orange-500 bg-clip-text text-transparent" style={{background: 'linear-gradient(to right, #f7931d, #773232, #f7931d)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'}}>
                 Grab 'n Go
               </h1>
               <p className="text-sm text-gray-600">International</p>
