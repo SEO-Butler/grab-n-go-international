@@ -47,7 +47,7 @@ const Header = () => {
             transition={{ duration: 0.2 }}
           >
             <img
-              src="../../public/images/Grab n Go logo -t.png"
+              src="/images/Grab n Go logo -t.png"
               alt="Grab 'n Go International Logo"
               className="h-12 w-auto"
             />
