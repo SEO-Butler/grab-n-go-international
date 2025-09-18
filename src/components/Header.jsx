@@ -8,6 +8,7 @@ const { FiMenu, FiX } = FiIcons;
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [pendingTarget, setPendingTarget] = useState(null);
 
   // Define explicit anchor targets that exist on the page
   const navItems = [
@@ -19,9 +20,38 @@ const Header = () => {
   ];
 
   const scrollToId = (id) => {
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const targetEl = document.getElementById(id);
+    if (!targetEl) return;
+
+    const headerEl = document.getElementById('site-header');
+    const headerHeight = headerEl ? headerEl.offsetHeight : 0;
+    const targetTop = targetEl.getBoundingClientRect().top + window.scrollY - headerHeight - 16;
+
+    window.requestAnimationFrame(() => {
+      window.scrollTo({
+        top: targetTop > 0 ? targetTop : 0,
+        behavior: 'smooth'
+      });
+    });
   };
+
+  useEffect(() => {
+    if (!isMenuOpen && pendingTarget) {
+      scrollToId(pendingTarget);
+      setPendingTarget(null);
+    }
+  }, [isMenuOpen, pendingTarget]);
+
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMenuOpen]);
 
   // Focus management for accessibility
   useEffect(() => {
@@ -40,12 +70,18 @@ const Header = () => {
   const handleNavClick = (e, item) => {
     e.preventDefault();
     track('menu_click', { item: item.label });
-    setIsMenuOpen(false);
-    scrollToId(item.id);
+    setPendingTarget(item.id);
+    if (isMenuOpen) {
+      setIsMenuOpen(false);
+    } else {
+      scrollToId(item.id);
+      setPendingTarget(null);
+    }
   };
 
   return (
     <motion.header
+      id="site-header"
       className="fixed top-0 w-full bg-white/95 backdrop-blur-sm shadow-lg z-50"
       initial={{ y: -100 }}
       animate={{ y: 0 }}
@@ -139,3 +175,4 @@ const Header = () => {
 };
 
 export default Header;
+

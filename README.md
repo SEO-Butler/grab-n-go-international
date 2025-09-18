@@ -215,3 +215,13 @@ For questions or support, please contact:
 <div align="center">
 Made with ❤️ for food lovers worldwide
 </div>
+
+## Git Push Workflow
+
+1. Run `git status` to review pending changes and confirm only the expected files are modified.
+2. Stage files with `git add <paths>`, keeping commits focused; use `git add .` only if every change belongs together.
+3. Commit with a short imperative summary using `git commit -m "Describe the change"`, or open the editor via `git commit` for a detailed body.
+4. Sync with remote updates using `git pull --rebase origin <branch>` so your work sits atop the latest commits.
+5. Push the branch upstream with `git push origin <branch>`; for new branches run `git push -u origin <branch>` once to set the tracking reference.
+6. Verify the push on GitHub, open or update the pull request, and ensure any CI checks pass before requesting review.
+

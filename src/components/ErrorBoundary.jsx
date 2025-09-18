@@ -6,6 +6,7 @@ class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
     this.state = { hasError: false, error: null, info: null, showDetails: import.meta.env.DEV };
+    this.handleReset = this.handleReset.bind(this);
   }
 
   static getDerivedStateFromError(error) {
@@ -15,7 +16,6 @@ class ErrorBoundary extends Component {
   componentDidCatch(error, info) {
     // Log to console in dev and to analytics in all envs
     if (import.meta.env.DEV) {
-      // eslint-disable-next-line no-console
       console.error('ErrorBoundary caught an error:', error, info);
     }
     try {
@@ -24,13 +24,17 @@ class ErrorBoundary extends Component {
         stack: error?.stack,
         componentStack: info?.componentStack,
       });
-    } catch {}
+    } catch (trackingError) {
+      if (import.meta.env.DEV) {
+        console.warn('ErrorBoundary analytics tracking failed:', trackingError);
+      }
+    }
     this.setState({ info });
   }
 
-  handleReset = () => {
+  handleReset() {
     this.setState({ hasError: false, error: null, info: null });
-  };
+  }
 
   render() {
     if (this.state.hasError) {
@@ -81,3 +85,5 @@ export function ErrorBoundaryRoutes({ children }) {
   // Reset the error boundary when the route changes
   return <ErrorBoundary key={location.pathname}>{children}</ErrorBoundary>;
 }
+
+
