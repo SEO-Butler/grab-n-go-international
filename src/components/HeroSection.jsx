@@ -5,6 +5,8 @@ import { eventConfig } from '../config/event';
 import { track } from '../lib/analytics';
 
 const HeroSection = () => {
+  const title = eventConfig.sections.hero.title;
+  const isImage = typeof title === 'string' && /\.(png|jpe?g|gif|svg|webp)$/i.test(title);
   return (
     <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Animated Background */}
@@ -37,18 +39,30 @@ const HeroSection = () => {
           Bon Voyage, Traveler! Your Passport to Flavor is Ready.
         </motion.p>
 
-        <motion.h1
-          className="text-5xl md:text-7xl font-bold mb-6"
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-        >
-          {eventConfig.sections.hero.title.split('\n').map((line, index) => (
-            <span key={index}>
-              {index === 0 ? line : <><br /><span className="text-yellow-300 font-light">{line}</span></>}
-            </span>
-          ))}
-        </motion.h1>
+        {/* Title or Logo */}
+        {isImage ? (
+          <motion.img
+            src={title}
+            alt={eventConfig.branding?.name || 'Event logo'}
+            className="mx-auto mb-6 w-[85%] max-w-[800px] h-auto drop-shadow-2xl"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+          />
+        ) : (
+          <motion.h1
+            className="text-5xl md:text-7xl font-bold mb-6"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+          >
+            {eventConfig.sections.hero.title.split('\n').map((line, index) => (
+              <span key={index}>
+                {index === 0 ? line : <><br /><span className="text-yellow-300 font-light">{line}</span></>}
+              </span>
+            ))}
+          </motion.h1>
+        )}
 
         <motion.p
           className="text-xl md:text-2xl mb-8"

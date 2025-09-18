@@ -8,7 +8,7 @@ export const eventConfig = {
   },
   sections: {
     hero: {
-      title: 'GRAB \'N GO\nINTERNATIONAL',
+      title: '/images/Grab n Go logo landscape t.png',
       subtitle: 'A World of Flavors Awaits You at El Campo!',
       date: 'OCTOBER 4TH, 2025',
       location: 'EL CAMPO NURSERY & RECREATIONAL PARK',
@@ -66,7 +66,7 @@ export const eventConfig = {
       {
         icon: '🎁',
         title: 'Special Reward',
-        description: 'Spend N$200+ at 4 different stalls & get a N$200 reward from the Duty Free Shop!',
+        description: 'Spend 400 (100 min per stall) at 4 different stalls and get N$ 150 voucher to spend in the duty free shop.',
         hoverText: 'Maximum savings!'
       },
     ],
