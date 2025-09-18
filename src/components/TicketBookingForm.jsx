@@ -7,8 +7,6 @@ import { track } from '../lib/analytics';
 
 const { FiUser, FiPhone, FiMapPin, FiCreditCard, FiCheck, FiAlertCircle } = FiIcons;
 
-const bookingEndpoint = (import.meta.env.VITE_FORM_ENDPOINT || '').trim();
-
 const TicketBookingForm = () => {
   const [formData, setFormData] = useState({
     firstName: '',
@@ -26,8 +24,6 @@ const TicketBookingForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [submitError, setSubmitError] = useState('');
-
-  const isConfigured = Boolean(bookingEndpoint);
 
   const ticketPlans = eventConfig.sections.tickets.plans;
   const ticketPrices = Object.fromEntries(
@@ -52,18 +48,11 @@ const TicketBookingForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!isConfigured) {
-      setSubmitError('Booking endpoint missing. Set VITE_FORM_ENDPOINT in your .env file to enable submissions.');
-      return;
-    }
-
     setIsSubmitting(true);
     setSubmitError('');
 
     track('submit_booking_start', { ticketType: formData.ticketType, quantity: formData.quantity });
 
-    // Prepare the JSON payload
     const payload = {
       personalInfo: {
         firstName: formData.firstName,
@@ -98,13 +87,12 @@ const TicketBookingForm = () => {
       submissionInfo: {
         submittedAt: new Date().toISOString(),
         userAgent: navigator.userAgent,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        origin: window.location.origin
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
       }
     };
 
     try {
-      const response = await fetch(bookingEndpoint, {
+      const response = await fetch('https://n8n-iit-u51337.vm.elestio.app/webhook/e60f9b4d-e9c4-4c0c-9fac-6c2aa7d3b161', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -117,21 +105,8 @@ const TicketBookingForm = () => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      let result = null;
-      const contentType = response.headers.get('content-type') || '';
-      if (contentType.includes('application/json')) {
-        try {
-          result = await response.json();
-        } catch (parseError) {
-          if (import.meta.env.DEV) {
-            console.warn('Booking endpoint returned non-JSON payload:', parseError);
-          }
-        }
-      }
-
-      if (import.meta.env.DEV) {
-        console.log('Form submitted successfully:', result || {});
-      }
+      const result = await response.json();
+      console.log('Form submitted successfully:', result);
 
       track('submit_booking_success', {
         ticketType: formData.ticketType,
@@ -141,11 +116,8 @@ const TicketBookingForm = () => {
 
       setIsSubmitting(false);
       setShowSuccess(true);
-      setSubmitError('');
     } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error('Form submission error:', error);
-      }
+      console.error('Form submission error:', error);
 
       track('submit_booking_error', {
         error: error.message,
@@ -154,39 +126,13 @@ const TicketBookingForm = () => {
       });
 
       setIsSubmitting(false);
-      const isCors = error instanceof TypeError && error.message === 'Failed to fetch';
-      const message = isCors
-        ? `Unable to reach ${bookingEndpoint}. The browser blocked the request (likely CORS). Allow ${window.location.origin} on the booking service or proxy the request through your hosting platform.`
-        : `Failed to submit booking: ${error.message}`;
-      setSubmitError(message);
+      setSubmitError(`Failed to submit booking: ${error.message}`);
     }
   };
 
-  if (!isConfigured) {
-    return (
-      <motion.div
-        className="max-w-2xl mx-auto bg-white rounded-3xl shadow-2xl p-8 text-center"
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
-      >
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Booking endpoint not configured</h2>
-        <p className="text-gray-600 mb-4">
-          Define <code className="font-mono">VITE_FORM_ENDPOINT</code> in your environment configuration so submissions can reach your webhook or API handler.
-        </p>
-        <p className="text-gray-500 text-sm">
-          Example: <code className="font-mono">VITE_FORM_ENDPOINT=https://your-domain.com/api/bookings</code>
-        </p>
-        {submitError && (
-          <p className="text-red-600 text-sm mt-4">{submitError}</p>
-        )}
-      </motion.div>
-    );
-  }
-
   if (showSuccess) {
     return (
-      <motion.div
+      <motion.div 
         className="max-w-2xl mx-auto bg-white rounded-3xl shadow-2xl p-8 text-center"
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -249,7 +195,7 @@ const TicketBookingForm = () => {
     >
       {/* Header */}
       <div className="bg-gradient-to-r from-orange-400 via-red-500 to-pink-500 p-8 text-white text-center">
-        <motion.h2
+        <motion.h2 
           className="text-3xl md:text-4xl font-bold mb-2"
           initial={{ opacity: 0, y: -20 }}
           whileInView={{ opacity: 1, y: 0 }}
