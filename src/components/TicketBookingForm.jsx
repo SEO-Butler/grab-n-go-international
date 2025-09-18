@@ -275,7 +275,7 @@ const TicketBookingForm = () => {
             >
               {ticketPlans.map(plan => (
                 <option key={plan.id} value={plan.id}>
-                  {plan.name} — N${plan.advance}.00 advance / N${plan.gate}.00 gate
+                  {plan.name} ï¿½ N${plan.advance}.00 advance / N${plan.gate}.00 gate
                 </option>
               ))}
             </select>
@@ -388,7 +388,7 @@ const TicketBookingForm = () => {
         {/* Submit Button */}
         <div className="lg:col-span-2 flex flex-col md:flex-row items-center md:justify-between gap-4">
           <p className="text-sm text-gray-500">
-            ?? Secure booking • ?? Digital tickets • ?? Instant confirmation
+             Secure booking 
           </p>
           <motion.button
             type="submit"
@@ -397,7 +397,7 @@ const TicketBookingForm = () => {
             whileTap={{ scale: 0.97 }}
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Submitting…' : 'Confirm Booking'}
+            {isSubmitting ? 'Submittingï¿½' : 'Confirm Booking'}
           </motion.button>
         </div>
       </form>
