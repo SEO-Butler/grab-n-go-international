@@ -7,6 +7,8 @@ import { track } from '../lib/analytics';
 
 const { FiUser, FiPhone, FiMapPin, FiCreditCard, FiCheck, FiAlertCircle } = FiIcons;
 
+const bookingEndpoint = (import.meta.env.VITE_FORM_ENDPOINT || '').trim();
+
 const TicketBookingForm = () => {
   const [formData, setFormData] = useState({
     firstName: '',
@@ -24,6 +26,8 @@ const TicketBookingForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [submitError, setSubmitError] = useState('');
+
+  const isConfigured = Boolean(bookingEndpoint);
 
   const ticketPlans = eventConfig.sections.tickets.plans;
   const ticketPrices = Object.fromEntries(
@@ -48,6 +52,12 @@ const TicketBookingForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!isConfigured) {
+      setSubmitError('Booking endpoint missing. Set VITE_FORM_ENDPOINT in your .env file to enable submissions.');
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmitError('');
 
@@ -73,7 +83,7 @@ const TicketBookingForm = () => {
       ticketInfo: {
         ticketType: formData.ticketType,
         ticketTypeName: ticketPrices[formData.ticketType].name,
-        quantity: parseInt(formData.quantity),
+        quantity: parseInt(formData.quantity, 10),
         pricePerTicket: ticketPrices[formData.ticketType].advance,
         totalAmount: calculateTotal(),
         gatePrice: ticketPrices[formData.ticketType].gate,
@@ -88,12 +98,13 @@ const TicketBookingForm = () => {
       submissionInfo: {
         submittedAt: new Date().toISOString(),
         userAgent: navigator.userAgent,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        origin: window.location.origin
       }
     };
 
     try {
-      const response = await fetch('https://n8n-iit-u51337.vm.elestio.app/webhook-test/e60f9b4d-e9c4-4c0c-9fac-6c2aa7d3b161', {
+      const response = await fetch(bookingEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -106,8 +117,21 @@ const TicketBookingForm = () => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const result = await response.json();
-      console.log('Form submitted successfully:', result);
+      let result = null;
+      const contentType = response.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        try {
+          result = await response.json();
+        } catch (parseError) {
+          if (import.meta.env.DEV) {
+            console.warn('Booking endpoint returned non-JSON payload:', parseError);
+          }
+        }
+      }
+
+      if (import.meta.env.DEV) {
+        console.log('Form submitted successfully:', result || {});
+      }
 
       track('submit_booking_success', {
         ticketType: formData.ticketType,
@@ -117,8 +141,11 @@ const TicketBookingForm = () => {
 
       setIsSubmitting(false);
       setShowSuccess(true);
+      setSubmitError('');
     } catch (error) {
-      console.error('Form submission error:', error);
+      if (import.meta.env.DEV) {
+        console.error('Form submission error:', error);
+      }
 
       track('submit_booking_error', {
         error: error.message,
@@ -127,13 +154,39 @@ const TicketBookingForm = () => {
       });
 
       setIsSubmitting(false);
-      setSubmitError(`Failed to submit booking: ${error.message}`);
+      const isCors = error instanceof TypeError && error.message === 'Failed to fetch';
+      const message = isCors
+        ? `Unable to reach ${bookingEndpoint}. The browser blocked the request (likely CORS). Allow ${window.location.origin} on the booking service or proxy the request through your hosting platform.`
+        : `Failed to submit booking: ${error.message}`;
+      setSubmitError(message);
     }
   };
 
+  if (!isConfigured) {
+    return (
+      <motion.div
+        className="max-w-2xl mx-auto bg-white rounded-3xl shadow-2xl p-8 text-center"
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Booking endpoint not configured</h2>
+        <p className="text-gray-600 mb-4">
+          Define <code className="font-mono">VITE_FORM_ENDPOINT</code> in your environment configuration so submissions can reach your webhook or API handler.
+        </p>
+        <p className="text-gray-500 text-sm">
+          Example: <code className="font-mono">VITE_FORM_ENDPOINT=https://your-domain.com/api/bookings</code>
+        </p>
+        {submitError && (
+          <p className="text-red-600 text-sm mt-4">{submitError}</p>
+        )}
+      </motion.div>
+    );
+  }
+
   if (showSuccess) {
     return (
-      <motion.div 
+      <motion.div
         className="max-w-2xl mx-auto bg-white rounded-3xl shadow-2xl p-8 text-center"
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -147,7 +200,7 @@ const TicketBookingForm = () => {
         >
           <SafeIcon icon={FiCheck} className="w-10 h-10 text-green-500" />
         </motion.div>
-        <h2 className="text-3xl font-bold text-gray-800 mb-4">Boarding Pass Confirmed! ✈️</h2>
+        <h2 className="text-3xl font-bold text-gray-800 mb-4">Boarding Pass Confirmed! ??</h2>
         <p className="text-gray-600 mb-6">
           Your ticket has been booked successfully. Check your email for your digital boarding pass.
         </p>
@@ -196,323 +249,211 @@ const TicketBookingForm = () => {
     >
       {/* Header */}
       <div className="bg-gradient-to-r from-orange-400 via-red-500 to-pink-500 p-8 text-white text-center">
-        <motion.h2 
+        <motion.h2
           className="text-3xl md:text-4xl font-bold mb-2"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          initial={{ opacity: 0, y: -20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
         >
-          🎫 Book Your Flight to Flavor
+          Reserve Your Boarding Pass
         </motion.h2>
-        <p className="text-lg opacity-90">Secure your spot at Grab 'n Go International</p>
+        <p className="text-lg text-white/80">
+          Secure your entry to Grab 'n Go International in just a few steps.
+        </p>
       </div>
 
-      {/* Pricing Banner */}
-      <motion.div 
-        className="bg-yellow-400 p-4 text-center text-black font-semibold"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.4 }}
-      >
-        <p>🔥 Early Bird Special: N$120 (Save N$30 vs Gate Price N$150)</p>
-      </motion.div>
-
-      {/* Error Message */}
-      {submitError && (
-        <motion.div
-          className="bg-red-50 border-l-4 border-red-400 p-4 m-4"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-        >
-          <div className="flex items-center">
-            <SafeIcon icon={FiAlertCircle} className="text-red-400 mr-2" />
-            <p className="text-red-700">{submitError}</p>
-          </div>
-        </motion.div>
-      )}
-
-      <form onSubmit={handleSubmit} className="p-8 space-y-8">
-        {/* Ticket Selection */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.1 }}
-        >
-          <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-            <SafeIcon icon={FiCreditCard} className="mr-2" />
-            Select Your Ticket
+      <form onSubmit={handleSubmit} className="p-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Personal Information */}
+        <div className="space-y-6">
+          <h3 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+            <SafeIcon icon={FiUser} className="text-orange-500" /> Passenger Details
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {Object.entries(ticketPrices).map(([key, ticket]) => (
-              <motion.label
-                key={key}
-                className={`block p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
-                  formData.ticketType === key 
-                    ? 'border-orange-500 bg-orange-50' 
-                    : 'border-gray-200 hover:border-orange-300'
-                }`}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <input
-                  type="radio"
-                  name="ticketType"
-                  value={key}
-                  checked={formData.ticketType === key}
-                  onChange={handleInputChange}
-                  className="sr-only"
-                />
-                <div className="text-center">
-                  <h4 className="font-semibold text-gray-800">{ticket.name}</h4>
-                  <div className="text-2xl font-bold text-orange-500 mt-2">
-                    N${ticket.advance}
-                  </div>
-                  <p className="text-sm text-gray-500">
-                    Gate Price: N${ticket.gate}
-                  </p>
-                </div>
-              </motion.label>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Quantity Selection */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Number of Tickets
-          </label>
-          <select
-            name="quantity"
-            value={formData.quantity}
-            onChange={handleInputChange}
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none transition-colors"
-            required
-          >
-            {[1,2,3,4,5,6,7,8,9,10].map(num => (
-              <option key={num} value={num}>{num} Ticket{num > 1 ? 's' : ''}</option>
-            ))}
-          </select>
-        </motion.div>
-
-        {/* Personal Information */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-            <SafeIcon icon={FiUser} className="mr-2" />
-            Passenger Information
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                First Name *
-              </label>
+            <label className="block">
+              <span className="text-sm text-gray-600">First Name</span>
               <input
                 type="text"
                 name="firstName"
                 value={formData.firstName}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none transition-colors"
                 required
+                className="mt-1 w-full rounded-xl border border-gray-200 px-4 py-3 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 transition"
+                placeholder="Jane"
               />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Last Name *
-              </label>
+            </label>
+            <label className="block">
+              <span className="text-sm text-gray-600">Last Name</span>
               <input
                 type="text"
                 name="lastName"
                 value={formData.lastName}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none transition-colors"
                 required
+                className="mt-1 w-full rounded-xl border border-gray-200 px-4 py-3 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 transition"
+                placeholder="Doe"
               />
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Contact Information */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.4 }}
-        >
-          <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-            <SafeIcon icon={FiPhone} className="mr-2" />
-            Contact Information
-          </h3>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Cellphone Number *
             </label>
+          </div>
+
+          <label className="block">
+            <span className="text-sm text-gray-600 flex items-center gap-2">
+              <SafeIcon icon={FiPhone} className="text-orange-500" />
+              Cellphone Number
+            </span>
             <input
               type="tel"
               name="cellphone"
               value={formData.cellphone}
               onChange={handleInputChange}
-              placeholder="+264 XX XXX XXXX"
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none transition-colors"
               required
+              className="mt-1 w-full rounded-xl border border-gray-200 px-4 py-3 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 transition"
+              placeholder="+264 81 234 5678"
             />
-          </div>
-        </motion.div>
+          </label>
+        </div>
 
-        {/* Address Information */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-            <SafeIcon icon={FiMapPin} className="mr-2" />
-            Address Information
+        {/* Ticket Selection */}
+        <div className="space-y-6">
+          <h3 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+            <SafeIcon icon={FiCreditCard} className="text-orange-500" /> Boarding Options
           </h3>
-          
-          {/* Address Type Toggle */}
-          <div className="mb-6">
-            <label className="flex items-center space-x-3 cursor-pointer">
-              <input
-                type="checkbox"
-                name="useMapLocation"
-                checked={formData.useMapLocation}
-                onChange={handleInputChange}
-                className="w-5 h-5 text-orange-500 rounded focus:ring-orange-500"
-              />
-              <span className="text-gray-700 font-medium">
-                Use Google Maps Location Pin instead of address
-              </span>
-            </label>
-          </div>
 
-          {!formData.useMapLocation ? (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Address Line 1 *
-                </label>
-                <input
-                  type="text"
-                  name="addressLine1"
-                  value={formData.addressLine1}
-                  onChange={handleInputChange}
-                  placeholder="Street address, P.O. box, company name"
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none transition-colors"
-                  required={!formData.useMapLocation}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Address Line 2
-                </label>
-                <input
-                  type="text"
-                  name="addressLine2"
-                  value={formData.addressLine2}
-                  onChange={handleInputChange}
-                  placeholder="Apartment, suite, unit, building, floor, etc."
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none transition-colors"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Address Line 3
-                </label>
-                <input
-                  type="text"
-                  name="addressLine3"
-                  value={formData.addressLine3}
-                  onChange={handleInputChange}
-                  placeholder="City, Region, Postal Code"
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none transition-colors"
-                />
-              </div>
-            </div>
-          ) : (
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Google Maps Location Pin *
-              </label>
+          <label className="block">
+            <span className="text-sm text-gray-600">Ticket Type</span>
+            <select
+              name="ticketType"
+              value={formData.ticketType}
+              onChange={handleInputChange}
+              className="mt-1 w-full rounded-xl border border-gray-200 px-4 py-3 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 transition"
+            >
+              {ticketPlans.map(plan => (
+                <option key={plan.id} value={plan.id}>
+                  {plan.name} � N${plan.advance}.00 advance / N${plan.gate}.00 gate
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="block">
+            <span className="text-sm text-gray-600">Number of Tickets</span>
+            <input
+              type="number"
+              name="quantity"
+              min="1"
+              value={formData.quantity}
+              onChange={handleInputChange}
+              className="mt-1 w-full rounded-xl border border-gray-200 px-4 py-3 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 transition"
+            />
+          </label>
+
+          <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4">
+            <h4 className="text-sm font-semibold text-gray-700 mb-2">Total Fare</h4>
+            <p className="text-3xl font-bold text-orange-500">N${calculateTotal()}</p>
+            <p className="text-sm text-green-600 mt-1">
+              You save N${(ticketPrices[formData.ticketType].gate - ticketPrices[formData.ticketType].advance) * formData.quantity} compared to gate price
+            </p>
+          </div>
+        </div>
+
+        {/* Address Section */}
+        <div className="lg:col-span-2 space-y-6">
+          <h3 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+            <SafeIcon icon={FiMapPin} className="text-orange-500" /> Delivery Details
+          </h3>
+
+          <label className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              name="useMapLocation"
+              checked={formData.useMapLocation}
+              onChange={handleInputChange}
+              className="h-5 w-5 rounded border-gray-300 text-orange-500 focus:ring-orange-400"
+            />
+            <span className="text-sm text-gray-700">Use Google Maps location instead of manual address</span>
+          </label>
+
+          {formData.useMapLocation ? (
+            <label className="block">
+              <span className="text-sm text-gray-600">Google Maps Location Link</span>
               <input
                 type="url"
                 name="mapLocation"
                 value={formData.mapLocation}
                 onChange={handleInputChange}
-                placeholder="Paste your Google Maps location link here"
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none transition-colors"
-                required={formData.useMapLocation}
+                required
+                className="mt-1 w-full rounded-xl border border-gray-200 px-4 py-3 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 transition"
+                placeholder="https://maps.google.com/..."
               />
-              <p className="text-sm text-gray-500 mt-2">
-                📍 Share your location from Google Maps and paste the link here
-              </p>
+            </label>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <label className="block">
+                <span className="text-sm text-gray-600">Address Line 1</span>
+                <input
+                  type="text"
+                  name="addressLine1"
+                  value={formData.addressLine1}
+                  onChange={handleInputChange}
+                  required
+                  className="mt-1 w-full rounded-xl border border-gray-200 px-4 py-3 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 transition"
+                  placeholder="Street Address"
+                />
+              </label>
+              <label className="block">
+                <span className="text-sm text-gray-600">Address Line 2</span>
+                <input
+                  type="text"
+                  name="addressLine2"
+                  value={formData.addressLine2}
+                  onChange={handleInputChange}
+                  className="mt-1 w-full rounded-xl border border-gray-200 px-4 py-3 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 transition"
+                  placeholder="Apartment, suite, etc."
+                />
+              </label>
+              <label className="block">
+                <span className="text-sm text-gray-600">Address Line 3</span>
+                <input
+                  type="text"
+                  name="addressLine3"
+                  value={formData.addressLine3}
+                  onChange={handleInputChange}
+                  className="mt-1 w-full rounded-xl border border-gray-200 px-4 py-3 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 transition"
+                  placeholder="City / Region"
+                />
+              </label>
             </div>
           )}
-        </motion.div>
+        </div>
 
-        {/* Order Summary */}
-        <motion.div
-          className="bg-gray-50 rounded-2xl p-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-        >
-          <h3 className="text-xl font-bold text-gray-800 mb-4">Order Summary</h3>
-          <div className="space-y-3">
-            <div className="flex justify-between">
-              <span>{ticketPrices[formData.ticketType].name}</span>
-              <span>N${ticketPrices[formData.ticketType].advance}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Quantity</span>
-              <span>{formData.quantity}</span>
-            </div>
-            <div className="border-t pt-3">
-              <div className="flex justify-between text-xl font-bold">
-                <span>Total</span>
-                <span className="text-orange-500">N${calculateTotal()}</span>
+        {/* Error Message */}
+        {submitError && (
+          <div className="lg:col-span-2">
+            <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              <SafeIcon icon={FiAlertCircle} className="mt-1 text-red-500" />
+              <div>
+                <p className="font-semibold">We couldn't complete your booking</p>
+                <p>{submitError}</p>
               </div>
-              <p className="text-sm text-gray-500 mt-1">
-                You save N${(ticketPrices[formData.ticketType].gate - ticketPrices[formData.ticketType].advance) * formData.quantity} vs gate price
-              </p>
             </div>
           </div>
-        </motion.div>
+        )}
 
         {/* Submit Button */}
-        <motion.button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full bg-gradient-to-r from-orange-400 via-red-500 to-pink-500 text-white py-4 rounded-xl text-xl font-bold hover:from-orange-500 hover:via-red-600 hover:to-pink-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-2xl"
-          whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
-          whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
-        >
-          {isSubmitting ? (
-            <div className="flex items-center justify-center space-x-2">
-              <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              <span>Processing Your Booking...</span>
-            </div>
-          ) : (
-            `🎫 Book Now - Pay N$${calculateTotal()}`
-          )}
-        </motion.button>
-
-        <motion.p 
-          className="text-center text-gray-600 text-sm"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-        >
-          🔒 Secure booking • 📱 Digital tickets • ✈️ Instant confirmation
-        </motion.p>
+        <div className="lg:col-span-2 flex flex-col md:flex-row items-center md:justify-between gap-4">
+          <p className="text-sm text-gray-500">
+            ?? Secure booking � ?? Digital tickets � ?? Instant confirmation
+          </p>
+          <motion.button
+            type="submit"
+            className="w-full md:w-auto bg-gradient-to-r from-orange-500 to-red-500 text-white px-10 py-4 rounded-full font-semibold text-lg shadow-lg hover:from-orange-600 hover:to-red-600 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
+            whileHover={{ scale: isSubmitting ? 1 : 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Submitting�' : 'Confirm Booking'}
+          </motion.button>
+        </div>
       </form>
     </motion.div>
   );

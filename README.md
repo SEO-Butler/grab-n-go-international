@@ -158,6 +158,10 @@ VITE_FORM_ENDPOINT=your-form-endpoint-url
 VITE_MAPS_API_KEY=your-google-maps-api-key
 ```
 
+Ensure the URL you set in `VITE_FORM_ENDPOINT` responds with `Access-Control-Allow-Origin` for both `http://localhost:5173` and your production domain.
+If the provider cannot add CORS headers, proxy the webhook through a same-origin endpoint (for example, a Vercel or Netlify serverless function).
+
+
 ## ♿ Accessibility Features
 
 - Semantic HTML structure
@@ -224,4 +228,7 @@ Made with ❤️ for food lovers worldwide
 4. Sync with remote updates using `git pull --rebase origin <branch>` so your work sits atop the latest commits.
 5. Push the branch upstream with `git push origin <branch>`; for new branches run `git push -u origin <branch>` once to set the tracking reference.
 6. Verify the push on GitHub, open or update the pull request, and ensure any CI checks pass before requesting review.
+
+
+
 
