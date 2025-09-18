@@ -27,10 +27,6 @@ export const eventConfig = {
           advance: 120,
           gate: 150,
           features: [
-            'Access to all food stalls',
-            'Duty-free shopping',
-            'Live music entertainment',
-            'Event souvenir'
           ],
           popular: false,
         },

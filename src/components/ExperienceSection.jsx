@@ -35,21 +35,30 @@ const ExperienceSection = () => {
           viewport={{ once: true }}
         >
           <h2 className="text-4xl md:text-5xl font-bold mb-8">
-            Fasten Your Seatbelt – It's Going to Be a 
+            Fasten Your Seatbelt – It's Going to Be a
             <span className="text-yellow-400"> Delicious Ride!</span>
           </h2>
-          
+
+          <motion.img
+            src="/images/hamburger.png"
+            alt="Juicy hamburger floating"
+            className="mx-auto w-24 md:w-32 drop-shadow-2xl"
+            initial={{ y: -15, opacity: 0 }}
+            whileInView={{ y: [0, -8, 0], opacity: 1 }}
+            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+          />
+
           <motion.p
-            className="text-lg md:text-xl leading-relaxed mb-8"
+            className="text-lg md:text-xl leading-relaxed mb-8 mt-6"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             viewport={{ once: true }}
           >
-            Imagine checking in at a bustling international terminal... but instead of luggage, 
-            you're collecting flavors! At Grab 'n Go International, we transform El Campo into 
-            a global food festival. Wander through our curated food stalls, each representing 
-            a different destination. Satisfy your cravings with authentic cuisine, then shop 
+            Imagine checking in at a bustling international terminal... but instead of luggage,
+            you're collecting flavors! At Grab 'n Go International, we transform El Campo into
+            a global food festival. Wander through our curated food stalls, each representing
+            a different destination. Satisfy your cravings with authentic cuisine, then shop
             for unique finds at our duty-free zone.
           </motion.p>
 
@@ -60,7 +69,7 @@ const ExperienceSection = () => {
             transition={{ duration: 0.8, delay: 0.4 }}
             viewport={{ once: true }}
           >
-            All while enjoying an energetic soundtrack that sets the perfect mood. This isn't 
+            All while enjoying an energetic soundtrack that sets the perfect mood. This isn't
             just eating; it's an unforgettable adventure for your taste buds.
           </motion.p>
         </motion.div>

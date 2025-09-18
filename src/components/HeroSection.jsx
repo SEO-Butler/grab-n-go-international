@@ -28,6 +28,17 @@ const HeroSection = () => {
       {/* Floating Icons */}
       <FloatingIcons />
 
+      {/* Flying Airplane */}
+      <motion.img
+        src="/images/Grab n Go airplane.png"
+        alt=""
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-10 -left-40 w-36 md:w-56 opacity-90 drop-shadow-xl"
+        initial={{ x: -200, y: 0, rotate: 0, opacity: 0 }}
+        animate={{ x: ['-20%', '120%'], y: [0, -8, 0], rotate: [0, 3, 0], opacity: 1 }}
+        transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut', repeatDelay: 1 }}
+      />
+
       {/* Content */}
       <div className="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
         <motion.p

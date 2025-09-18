@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import * as FiIcons from 'react-icons/fi';
 import SafeIcon from '../common/SafeIcon';
-import { toSlug } from '../utils/slug';
 import { track } from '../lib/analytics';
 
 const { FiMenu, FiX } = FiIcons;
@@ -10,7 +9,19 @@ const { FiMenu, FiX } = FiIcons;
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const navItems = ['Home', 'Event Details', 'Food Stalls', 'Tickets', 'FAQ', 'Contact'];
+  // Define explicit anchor targets that exist on the page
+  const navItems = [
+    { label: 'Home', id: 'home' },
+    { label: 'Event Details', id: 'event-details' },
+    { label: 'Food Stalls', id: 'food-stalls' },
+    { label: 'Tickets', id: 'tickets' },
+    { label: 'Contact', id: 'contact' },
+  ];
+
+  const scrollToId = (id) => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   // Focus management for accessibility
   useEffect(() => {
@@ -26,13 +37,15 @@ const Header = () => {
     track('menu_toggle', { opened: !isMenuOpen });
   };
 
-  const handleNavClick = (item) => {
-    track('menu_click', { item });
+  const handleNavClick = (e, item) => {
+    e.preventDefault();
+    track('menu_click', { item: item.label });
     setIsMenuOpen(false);
+    scrollToId(item.id);
   };
 
   return (
-    <motion.header 
+    <motion.header
       className="fixed top-0 w-full bg-white/95 backdrop-blur-sm shadow-lg z-50"
       initial={{ y: -100 }}
       animate={{ y: 0 }}
@@ -63,16 +76,16 @@ const Header = () => {
           <nav className="hidden md:flex space-x-8">
             {navItems.map((item, index) => (
               <motion.a
-                key={item}
-                href={`#${toSlug(item)}`}
+                key={item.id}
+                href={`#${item.id}`}
                 className="text-gray-700 hover:text-orange-500 font-medium transition-colors duration-200"
                 whileHover={{ y: -2 }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                onClick={() => handleNavClick(item)}
+                onClick={(e) => handleNavClick(e, item)}
               >
-                {item}
+                {item.label}
               </motion.a>
             ))}
           </nav>
@@ -109,13 +122,13 @@ const Header = () => {
           <div className="flex flex-col space-y-4 py-4">
             {navItems.map((item, index) => (
               <a
-                key={item}
-                href={`#${toSlug(item)}`}
+                key={item.id}
+                href={`#${item.id}`}
                 className="text-gray-700 hover:text-orange-500 font-medium focus:text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 rounded px-2 py-1"
-                onClick={() => handleNavClick(item)}
+                onClick={(e) => handleNavClick(e, item)}
                 data-mobile-menu-item={index === 0 ? true : undefined}
               >
-                {item}
+                {item.label}
               </a>
             ))}
           </div>

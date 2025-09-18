@@ -22,6 +22,27 @@ const EventHighlights = () => {
             What's On Board?
           </h2>
           <div className="w-24 h-1 bg-gradient-to-r from-red-500 to-yellow-500 mx-auto"></div>
+          {/* Departure/Arrival Icons */}
+          <div className="mt-6 flex items-center justify-center gap-6 opacity-90">
+            <motion.img
+              src="/images/departure.png"
+              alt="Departure"
+              className="h-10 w-auto"
+              initial={{ y: -10, opacity: 0 }}
+              whileInView={{ y: 0, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+            />
+            <motion.img
+              src="/images/arrival.png"
+              alt="Arrival"
+              className="h-10 w-auto"
+              initial={{ y: 10, opacity: 0 }}
+              whileInView={{ y: 0, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.1 }}
+            />
+          </div>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">

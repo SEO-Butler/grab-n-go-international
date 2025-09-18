@@ -26,6 +26,16 @@ const LocationSection = () => {
           <p className="text-xl" style={{color: '#193818'}}>
             Head to {location.description} for your adventure!
           </p>
+          <motion.img
+            src="/images/El Campo.png"
+            alt="El Campo Nursery & Recreational Park"
+            loading="lazy"
+            className="mx-auto mt-6 mb-2 w-48 md:w-64 h-auto drop-shadow-lg"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          />
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
@@ -38,10 +48,22 @@ const LocationSection = () => {
             viewport={{ once: true }}
           >
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-              <div 
+              <div
                 className="h-80 relative flex items-center justify-center"
                 style={{background: 'linear-gradient(135deg, #b14724 0%, #193818 100%)'}}
               >
+                {/* Decorative plane near map */}
+                <motion.img
+                  src="/images/Grab n Go airplane.png"
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute top-4 left-4 w-10 opacity-90"
+                  initial={{ rotate: -10, scale: 0, opacity: 0 }}
+                  whileInView={{ rotate: [ -10, 5, -10 ], scale: 1, opacity: 1 }}
+                  transition={{ duration: 1, delay: 0.2 }}
+                  viewport={{ once: true }}
+                />
+
                 {/* Interactive Map Link */}
                 <motion.a
                   href={googleMapsUrl}
