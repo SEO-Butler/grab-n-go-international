@@ -170,7 +170,7 @@ const TicketSection = () => {
           viewport={{ once: true }}
         >
           <p className="text-gray-600 mb-4">
-            All attendees receive a digital "Boarding Pass" upon purchase.
+            Place your order, we will call them to make free delivery around Windhoek.
           </p>
           <div className="bg-yellow-100 border-l-4 border-yellow-400 p-4 max-w-2xl mx-auto rounded-r-lg">
             <p className="text-yellow-800 font-semibold">
